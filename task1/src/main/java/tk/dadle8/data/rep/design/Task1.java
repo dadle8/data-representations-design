@@ -1,4 +1,4 @@
-package task1;
+package tk.dadle8.data.rep.design;
 
 public class Task1 {
 
