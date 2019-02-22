@@ -17,4 +17,12 @@ public class Row {
     public String toString() {
         return Arrays.toString(components);
     }
+
+    public Object getComponentValue(int orderInRow) {
+        return components[orderInRow].getValue();
+    }
+
+    public void setComponentValue(int orderInRow, Object value) {
+        components[orderInRow].setValue(value);
+    }
 }

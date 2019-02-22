@@ -1,59 +1,29 @@
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 import tk.dadle8.data.rep.design.datamodel.RelationTable;
-import tk.dadle8.data.rep.design.datamodel.structure.Attribute;
-import tk.dadle8.data.rep.design.datamodel.structure.Component;
+import tk.dadle8.data.rep.design.datamodel.structure.Column;
 import tk.dadle8.data.rep.design.datamodel.structure.Row;
-
 
 public class DataModelTest {
 
-    private RelationTable relationTable;
+    protected RelationTable relationTable;
 
-    private Attribute[] attributes = new Attribute[]{
-            new Attribute("Column1"),
-            new Attribute("Column2"),
-            new Attribute("Column3")
-    };
+    protected String[] columnNames = new String[]{"Column1", "Column2", "Column3"};
+    protected int rowCount = 10;
 
     @Before
     public void init() {
-        relationTable = new RelationTable("Test Table", attributes, new Row[]{});
+        relationTable = new RelationTable("Test Table",
+                new Column[]{
+                        new Column("Column1", Integer.class, 0),
+                        new Column("Column2", Integer.class, 1),
+                        new Column("Column3", Integer.class, 2)
+                },
+                new Row[]{});
     }
 
     @After
     public void after() {
         System.out.println(relationTable + "\n");
-    }
-
-    @Test
-    public void test_insert_rows() {
-        Component[] components = new Component[]{
-                new Component(1),
-                new Component(2),
-                new Component(3)
-        };
-
-        relationTable.insert(attributes, components);
-        relationTable.insert(attributes, components);
-        relationTable.insert(attributes, components);
-
-        Component[] componentsWithNull = new Component[]{
-                new Component(1),
-                new Component(2),
-                null
-        };
-        relationTable.insert(attributes, componentsWithNull);
-    }
-
-    @Test
-    public void test_insert_rows_with_null() {
-        Component[] componentsWithNull = new Component[]{
-                new Component(1),
-                new Component(2),
-                null
-        };
-        relationTable.insert(attributes, componentsWithNull);
     }
 }

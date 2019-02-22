@@ -9,7 +9,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class BooleanCondition extends Condition {
 
-    private RelationCondition leftCondition;
-    private RelationCondition rightCondition;
     private BooleanOperator operator;
 }

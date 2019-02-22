@@ -7,10 +7,12 @@ import tk.dadle8.data.rep.design.datamodel.structure.Column;
 import tk.dadle8.data.rep.design.datamodel.structure.Component;
 import tk.dadle8.data.rep.design.datamodel.structure.Row;
 
+import java.util.List;
+
 public interface BasicTableOperations {
 
-    Row insert(Attribute[] attributes, Component[] components);
-    RelationTable select(Condition[] relationConditions, Column[] columns, Row[] rows);
-    int update(Condition[] relationConditions, Column[] columns, Row[] rows);
-    int delete(Condition[] relationConditions);
+    Row insert(String[] columnNames, Object[] values);
+    List<Row> select(Condition[] conditions);
+    int update(Condition[] conditions, String[] columnNames, Object[] values);
+    int delete(Condition[] conditions);
 }

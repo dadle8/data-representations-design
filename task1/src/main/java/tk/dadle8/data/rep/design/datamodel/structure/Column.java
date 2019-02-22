@@ -9,10 +9,15 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Column {
 
-    private Attribute attribute;
+    private String name;
+    private Class<?> type;
+    private int order;
+//    private Attribute attribute;
+//    private Restriction[] restrictions
+
 
     @Override
     public String toString() {
-        return attribute.getName();
+        return getName();
     }
 }

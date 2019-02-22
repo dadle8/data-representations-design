@@ -7,4 +7,13 @@ public class RelationTableValidator {
             throw new RuntimeException("The number of columnOrderMap does not match");
         }
     }
+
+    public void valueTypeInRow(Object newValue, Class typeInColumn) {
+        if (newValue == null) {
+            return;
+        }
+        if (!newValue.getClass().equals(typeInColumn)) {
+            throw new RuntimeException("Another type for adding value");
+        }
+    }
 }
