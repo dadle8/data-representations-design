@@ -1,3 +1,4 @@
+import org.junit.Assert;
 import org.junit.Test;
 import tk.dadle8.data.rep.design.datamodel.query.Condition;
 import tk.dadle8.data.rep.design.datamodel.query.BooleanCondition;
@@ -15,7 +16,7 @@ public class BasicTableOperationsTest extends DataModelTest {
         Integer[] values = new Integer[]{1, 2, 3};
 
         for (int i = 0; i < rowCount; i++) {
-            relationTable.insert(columnNames, values);
+            tableService.insert(relationTable, columnNames, values);
         }
     }
 
@@ -24,14 +25,14 @@ public class BasicTableOperationsTest extends DataModelTest {
         Integer[] valuesWithNull = new Integer[]{1, 2, null};
 
         for (int i = 0; i < rowCount; i++) {
-            relationTable.insert(columnNames, valuesWithNull);
+            tableService.insert(relationTable, columnNames, valuesWithNull);
         }
     }
 
     @Test(expected = RuntimeException.class)
     public void test_insert_rows_with_different_types() {
         Object[] valuesWithAnotherTypes = new Object[]{1, String.valueOf(2), 3};
-        relationTable.insert(new String[]{"Column1", "Column3", "Column2"}, valuesWithAnotherTypes);
+        tableService.insert(relationTable, new String[]{"Column1", "Column3", "Column2"}, valuesWithAnotherTypes);
     }
 
     @Test
@@ -39,12 +40,13 @@ public class BasicTableOperationsTest extends DataModelTest {
         Integer[] values = new Integer[]{1, 2, 3};
 
         for (int i = 0; i < 1000; i++) {
-            relationTable.insert(new String[]{"Column1", "Column3", "Column2"}, values);
-            relationTable.insert(new String[]{"Column1", "Column3", "Column2"}, values);
-            relationTable.insert(new String[]{"Column2", "Column1", "Column3"}, values);
+            tableService.insert(relationTable, new String[]{"Column1", "Column3", "Column2"}, values);
+            tableService.insert(relationTable, new String[]{"Column1", "Column3", "Column2"}, values);
+            tableService.insert(relationTable, new String[]{"Column2", "Column1", "Column3"}, values);
         }
 
-        List<Row> selectedRows = relationTable.select(
+        List<Row> selectedRows = tableService.select(
+                relationTable,
                 new Condition[]{
                         new RelationCondition(
                                 "Column1",
@@ -57,6 +59,10 @@ public class BasicTableOperationsTest extends DataModelTest {
                                 3,
                                 Operator.EQ)
                 });
+        selectedRows.forEach(row -> {
+            Assert.assertTrue(row.getComponentValue(relationTable.getColumns().get("Column1").getOrder()).equals(2)
+                    || row.getComponentValue(relationTable.getColumns().get("Column2").getOrder()).equals(3));
+        });
         System.out.println(selectedRows.size());
     }
 
@@ -64,11 +70,12 @@ public class BasicTableOperationsTest extends DataModelTest {
     public void test_delete_row() {
         Integer[] values = new Integer[]{1, 2, 3};
 
-        relationTable.insert(new String[]{"Column1", "Column3", "Column2"}, values);
-        relationTable.insert(new String[]{"Column1", "Column3", "Column2"}, values);
-        relationTable.insert(new String[]{"Column2", "Column1", "Column3"}, values);
+        tableService.insert(relationTable, new String[]{"Column1", "Column3", "Column2"}, values);
+        tableService.insert(relationTable, new String[]{"Column1", "Column3", "Column2"}, values);
+        tableService.insert(relationTable, new String[]{"Column2", "Column1", "Column3"}, values);
 
-        int countDeletedRows = relationTable.delete(
+        int countDeletedRows = tableService.delete(
+                relationTable,
                 new Condition[]{
                         new RelationCondition(
                                 "Column1",
