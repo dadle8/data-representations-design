@@ -66,9 +66,9 @@ public class RelationTable implements BasicTableOperations {
 
     public int update(Condition[] conditions, String[] columnNames, Object[] values) {
         List<Row> selectedRows = selectRows(conditions);
-        for (Row row : rows) {
-            for (String columnName : columnNames) {
-                row.setComponentValue(getOrderByColumnName(columnName), values);
+        for (Row row : selectedRows) {
+            for (var i = 0; i < columnNames.length; i++) {
+                row.setComponentValue(getOrderByColumnName(columnNames[i]), values[i]);
             }
         }
         return selectedRows.size();

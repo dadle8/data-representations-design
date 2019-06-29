@@ -1,10 +1,6 @@
 import org.junit.Assert;
 import org.junit.Test;
-import tk.dadle8.data.rep.design.datamodel.query.Condition;
-import tk.dadle8.data.rep.design.datamodel.query.BooleanCondition;
-import tk.dadle8.data.rep.design.datamodel.query.RelationCondition;
-import tk.dadle8.data.rep.design.datamodel.query.Operator;
-import tk.dadle8.data.rep.design.datamodel.query.BooleanOperator;
+import tk.dadle8.data.rep.design.datamodel.query.*;
 import tk.dadle8.data.rep.design.datamodel.structure.Row;
 
 import java.util.List;
@@ -39,7 +35,7 @@ public class BasicTableOperationsTest extends DataModelTest {
     public void test_select_row() {
         Integer[] values = new Integer[]{1, 2, 3};
 
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 10; i++) {
             relationTable.insert(new String[]{"Column1", "Column3", "Column2"}, values);
             relationTable.insert(new String[]{"Column1", "Column3", "Column2"}, values);
             relationTable.insert(new String[]{"Column2", "Column1", "Column3"}, values);
@@ -74,12 +70,23 @@ public class BasicTableOperationsTest extends DataModelTest {
         relationTable.insert(new String[]{"Column2", "Column1", "Column3"}, values);
 
         int countDeletedRows = relationTable.delete(
-                new Condition[]{
-                        new RelationCondition(
-                                "Column1",
-                                2,
-                                Operator.EQ)
-                });
-        Assert.assertEquals(1000, countDeletedRows);
+                new Condition[]{new RelationCondition("Column1", 2, Operator.EQ)}
+        );
+        Assert.assertEquals(1, countDeletedRows);
+    }
+
+    @Test
+    public void test_update_row() {
+        Integer[] values = new Integer[]{1, 2, 3};
+
+        relationTable.insert(new String[]{"Column1", "Column3", "Column2"}, values);
+        relationTable.insert(new String[]{"Column1", "Column3", "Column2"}, values);
+        relationTable.insert(new String[]{"Column2", "Column1", "Column3"}, values);
+
+        relationTable.update(new Condition[]{
+                new RelationCondition("Column1", 2, Operator.EQ)},
+                new String[]{"Column1"},
+                new Integer[]{10}
+        );
     }
 }
