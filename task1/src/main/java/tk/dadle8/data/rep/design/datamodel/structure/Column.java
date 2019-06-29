@@ -1,6 +1,7 @@
 package tk.dadle8.data.rep.design.datamodel.structure;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,7 +15,6 @@ public class Column {
     private int order;
 //    private Attribute attribute;
 //    private Restriction[] restrictions
-
 
     @Override
     public String toString() {

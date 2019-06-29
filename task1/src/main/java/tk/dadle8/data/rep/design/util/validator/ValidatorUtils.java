@@ -1,6 +1,6 @@
 package tk.dadle8.data.rep.design.util.validator;
 
-public class RelationTableValidator {
+public class ValidatorUtils {
 
     public void columnLengthValidate(int columnCountInTable, int columnCountInQuery) {
         if (columnCountInTable != columnCountInQuery) {

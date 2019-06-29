@@ -16,7 +16,7 @@ public class BasicTableOperationsTest extends DataModelTest {
         Integer[] values = new Integer[]{1, 2, 3};
 
         for (int i = 0; i < rowCount; i++) {
-            tableService.insert(relationTable, columnNames, values);
+            relationTable.insert(columnNames, values);
         }
     }
 
@@ -25,14 +25,14 @@ public class BasicTableOperationsTest extends DataModelTest {
         Integer[] valuesWithNull = new Integer[]{1, 2, null};
 
         for (int i = 0; i < rowCount; i++) {
-            tableService.insert(relationTable, columnNames, valuesWithNull);
+            relationTable.insert(columnNames, valuesWithNull);
         }
     }
 
     @Test(expected = RuntimeException.class)
     public void test_insert_rows_with_different_types() {
         Object[] valuesWithAnotherTypes = new Object[]{1, String.valueOf(2), 3};
-        tableService.insert(relationTable, new String[]{"Column1", "Column3", "Column2"}, valuesWithAnotherTypes);
+        relationTable.insert(new String[]{"Column1", "Column3", "Column2"}, valuesWithAnotherTypes);
     }
 
     @Test
@@ -40,13 +40,12 @@ public class BasicTableOperationsTest extends DataModelTest {
         Integer[] values = new Integer[]{1, 2, 3};
 
         for (int i = 0; i < 1000; i++) {
-            tableService.insert(relationTable, new String[]{"Column1", "Column3", "Column2"}, values);
-            tableService.insert(relationTable, new String[]{"Column1", "Column3", "Column2"}, values);
-            tableService.insert(relationTable, new String[]{"Column2", "Column1", "Column3"}, values);
+            relationTable.insert(new String[]{"Column1", "Column3", "Column2"}, values);
+            relationTable.insert(new String[]{"Column1", "Column3", "Column2"}, values);
+            relationTable.insert(new String[]{"Column2", "Column1", "Column3"}, values);
         }
 
-        List<Row> selectedRows = tableService.select(
-                relationTable,
+        List<Row> selectedRows = relationTable.select(
                 new Condition[]{
                         new RelationCondition(
                                 "Column1",
@@ -60,8 +59,8 @@ public class BasicTableOperationsTest extends DataModelTest {
                                 Operator.EQ)
                 });
         selectedRows.forEach(row -> {
-            Assert.assertTrue(row.getComponentValue(relationTable.getColumns().get("Column1").getOrder()).equals(2)
-                    || row.getComponentValue(relationTable.getColumns().get("Column2").getOrder()).equals(3));
+            Assert.assertTrue(row.getComponentValue(relationTable.getOrderByColumnName("Column1")).equals(2)
+                    || row.getComponentValue(relationTable.getOrderByColumnName("Column2")).equals(3));
         });
         System.out.println(selectedRows.size());
     }
@@ -70,18 +69,17 @@ public class BasicTableOperationsTest extends DataModelTest {
     public void test_delete_row() {
         Integer[] values = new Integer[]{1, 2, 3};
 
-        tableService.insert(relationTable, new String[]{"Column1", "Column3", "Column2"}, values);
-        tableService.insert(relationTable, new String[]{"Column1", "Column3", "Column2"}, values);
-        tableService.insert(relationTable, new String[]{"Column2", "Column1", "Column3"}, values);
+        relationTable.insert(new String[]{"Column1", "Column3", "Column2"}, values);
+        relationTable.insert(new String[]{"Column1", "Column3", "Column2"}, values);
+        relationTable.insert(new String[]{"Column2", "Column1", "Column3"}, values);
 
-        int countDeletedRows = tableService.delete(
-                relationTable,
+        int countDeletedRows = relationTable.delete(
                 new Condition[]{
                         new RelationCondition(
                                 "Column1",
                                 2,
                                 Operator.EQ)
                 });
-        System.out.println(countDeletedRows);
+        Assert.assertEquals(1000, countDeletedRows);
     }
 }
