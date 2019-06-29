@@ -25,7 +25,7 @@ public class RelationTable implements BasicTableOperations {
     private String name;
     private Map<String, Column> columns = new LinkedHashMap<>();
     private List<Row> rows = new ArrayList<>();
-    private int columnSize;
+    private int columnsLength;
     private ValidatorUtils validatorUtils = new ValidatorUtils();
     private ConditionUtils conditionUtils = new ConditionUtils();
 
@@ -38,7 +38,7 @@ public class RelationTable implements BasicTableOperations {
 
         Stream.of(columns).forEach(column -> this.columns.put(column.getName(), column));
         this.rows.addAll(Arrays.asList(rows));
-        this.columnSize = columns.length;
+        this.columnsLength = columns.length;
     }
 
     private Column getColumnByName(String name) {
@@ -50,7 +50,7 @@ public class RelationTable implements BasicTableOperations {
     }
 
     public void insert(String[] columnNames, Object[] values) {
-        Component[] newComponents = new Component[columnSize];
+        Component[] newComponents = new Component[columnsLength];
         for (int i = 0; i < columnNames.length; i++) {
             Column column = getColumnByName(columnNames[i]);
             validatorUtils.valueTypeInRow(values[i], column.getType());
