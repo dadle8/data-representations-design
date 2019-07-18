@@ -1,4 +1,4 @@
-package tk.dadle8.data.rep.design.serialization.binary;
+package tk.dadle8.data.rep.design.serialization.binary.page.datamodel;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,4 +1,8 @@
-package tk.dadle8.data.rep.design.serialization.binary;
+package tk.dadle8.data.rep.design.serialization.binary.page.impl;
+
+import tk.dadle8.data.rep.design.serialization.binary.page.datamodel.Page;
+import tk.dadle8.data.rep.design.serialization.binary.page.datamodel.PageData;
+import tk.dadle8.data.rep.design.serialization.binary.page.datamodel.PageHeader;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -29,15 +33,11 @@ public class PageReader {
     public PageData readPageDate() {
         ByteBuffer buffer = ByteBuffer.wrap(rawData, headerOff, len - headerOff);
 
-        PageData data = new PageData();
-        data.setData(buffer.array());
-
-        return data;
+        return new PageData(buffer.array());
     }
 
     public PageHeader readPageHeader() throws IOException {
         ByteBuffer buffer = ByteBuffer.wrap(rawData, 0, headerOff);
-
 
         PageHeader header = new PageHeader();
         header.setPageNumber(buffer.getInt());

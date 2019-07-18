@@ -1,4 +1,7 @@
-package tk.dadle8.data.rep.design.serialization.binary;
+package tk.dadle8.data.rep.design.serialization.binary.page.impl;
+
+import tk.dadle8.data.rep.design.serialization.binary.page.datamodel.Page;
+import tk.dadle8.data.rep.design.serialization.binary.page.datamodel.PageHeader;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -21,7 +24,7 @@ public class PageWriter {
     }
 
     public void writePageDate() throws IOException {
-        oos.write(page.getData().getData());
+        oos.write(page.getData().getData().array());
     }
 
     public void writePageHeader() throws IOException {
