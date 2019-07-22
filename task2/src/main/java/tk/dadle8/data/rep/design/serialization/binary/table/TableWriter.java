@@ -1,11 +1,16 @@
 package tk.dadle8.data.rep.design.serialization.binary.table;
 
 import tk.dadle8.data.rep.design.datamodel.RelationTable;
+import tk.dadle8.data.rep.design.datamodel.structure.Column;
 import tk.dadle8.data.rep.design.serialization.binary.page.datamodel.Page;
-import tk.dadle8.data.rep.design.serialization.binary.page.impl.PageWriter;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import static tk.dadle8.data.rep.design.serialization.binary.page.utils.PageUtils.*;
 
 public class TableWriter {
 
@@ -13,35 +18,63 @@ public class TableWriter {
     private RelationTable table;
 
     public TableWriter(RelationTable table) {
-        this.page = new Page();
+        this.page = new Page(pageTypeNameColumns);
         this.table = table;
     }
 
     public void writeTable() {
         writeTableName();
+        writeTableColumns();
     }
 
     protected void writeTableName() {
         byte[] name = table.getName().getBytes();
-        createNewPageIfNoFreeSpace(name);
+        createNewPageIfNoFreeSpace(name.length);
 
-        page.getData().writeData(name);
-        page.reduceSpace(name.length + 2 * Integer.BYTES);
+        page.writeData(name);
+        page.reduceSpace(name.length + sizeOffFullPointer);
     }
 
-    private void createNewPageIfNoFreeSpace(byte[] data) {
-        if (page.getHeader().getPageFreeSpace() + 2 * Integer.BYTES < data.length) {
+    protected void writeTableColumns() {
+        table.getColumns().values().forEach(this::writeTableColumn);
+    }
+
+    private void writeTableColumn(Column column) {
+        byte[] name = column.getName().getBytes();
+        byte[] type = column.getType().getCanonicalName().getBytes();
+        byte[] order = intToBytes(column.getOrder());
+        int allDataLength = name.length + type.length + order.length;
+        createNewPageIfNoFreeSpace(allDataLength);
+
+        ByteBuffer columnData = ByteBuffer.wrap(new byte[allDataLength]);
+        columnData.put(name);
+        columnData.put(type);
+        columnData.put(order);
+
+        page.writeData(columnData.array());
+        page.reduceSpace(allDataLength + sizeOffFullPointer);
+    }
+
+    protected void writeTableRows() {
+
+    }
+
+    private void createNewPageIfNoFreeSpace(int dataLength) {
+        if (page.getDataLength() - pageHeaderSize - sizeOffFullPointer < dataLength) {
+            throw new RuntimeException("Too much data size =(");
+        }
+        if (page.getFreeSpace() + sizeOffFullPointer < dataLength) {
             Page newPage = new Page(page.getDataLength());
             newPage.getHeader().setPageNumber(page.getHeader().getPageNumber());
             newPage.getHeader().setPageType(page.getHeader().getPageType());
-            newPage.getHeader().setPageFreeSpace(page.getDataLength());
             newPage.getHeader().setPageId(page.getHeader().getPageId());
 
-            try {
-                PageWriter pageWriter = new PageWriter(page, new File("table.td"));
-            } catch (IOException exc) {
-                throw new RuntimeException("Can not write page =(");
-            }
+//            TODO: need to write page to file, when no free space on old page
+//            try {
+//                PageWriter pageWriter = new PageWriter(page, new File("table.td"));
+//            } catch (IOException exc) {
+//                throw new RuntimeException("Can not write page =(");
+//            }
 
             page = newPage;
         }

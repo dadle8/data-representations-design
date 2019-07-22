@@ -5,6 +5,9 @@ import lombok.Setter;
 
 import java.nio.ByteBuffer;
 
+import static tk.dadle8.data.rep.design.serialization.binary.page.utils.PageUtils.offOffset;
+import static tk.dadle8.data.rep.design.serialization.binary.page.utils.PageUtils.sizeOffFullPointer;
+
 @Getter
 @Setter
 public class PageData {
@@ -25,10 +28,10 @@ public class PageData {
     public void writeData(byte[] src) {
         data.put(src);
 
-        data.putInt(offEnd - 2 * Integer.BYTES, offStart);
-        data.putInt(offEnd - Integer.BYTES, src.length);
+        data.putInt(offEnd - sizeOffFullPointer, src.length);
+        data.putInt(offEnd - offOffset, offStart);
 
-        offEnd -= 2 * Integer.BYTES;
+        offEnd -= sizeOffFullPointer;
         offStart += src.length;
     }
 }
