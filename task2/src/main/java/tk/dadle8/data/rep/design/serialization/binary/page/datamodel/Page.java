@@ -14,9 +14,9 @@ public class Page {
     public Page(int type) {
         header = new PageHeader();
         header.setPageType(type);
-        header.setPageFreeSpace(PageUtils.defaultDataLength - PageUtils.pageHeaderSize);
-        data = new PageData(PageUtils.defaultDataLength - PageUtils.pageHeaderSize);
-        dataLength = PageUtils.defaultDataLength;
+        header.setPageFreeSpace(PageUtils.pageDataLength);
+        data = new PageData(PageUtils.pageDataLength);
+        dataLength = PageUtils.pageLength;
     }
 
     public Page(int type, int dataLength) {
@@ -25,6 +25,12 @@ public class Page {
         this.header.setPageType(type);
         this.data = new PageData(dataLength - PageUtils.pageHeaderSize);
         this.dataLength = dataLength;
+    }
+
+    public Page(PageHeader header, PageData data) {
+        this.header = header;
+        this.data = data;
+        this.dataLength = PageUtils.pageHeaderSize + data.getData().capacity();
     }
 
     public int getFreeSpace() {
@@ -37,5 +43,9 @@ public class Page {
 
     public void writeData(byte[] data) {
         this.data.writeData(data);
+    }
+
+    public byte[] readData() {
+        return this.data.readData();
     }
 }

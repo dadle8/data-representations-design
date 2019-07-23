@@ -1,12 +1,12 @@
 package tk.dadle8.data.rep.design.serialization.binary.page.utils;
 
 public class PageUtils {
-    public static int pageHeaderSize = 32;
-    public static int defaultDataLength = 128;
+    public static int pageHeaderSize = 16;
+    public static int pageLength = 128;
+    public static int pageDataLength = pageLength - pageHeaderSize;
     public static int offLength = Integer.BYTES;
     public static int offOffset = Integer.BYTES;
     public static int sizeOffFullPointer = offOffset + offLength;
-//    public static int defaultDataLength = 8192;
     public static int pageTypeNameColumns = 0;
     public static int pageTypeRows = 1;
     public static int pageTypeNameColumnsContinue = 2;

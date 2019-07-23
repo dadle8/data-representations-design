@@ -23,6 +23,8 @@ public class PageData {
 
     public PageData(byte[] data) {
         this.data = ByteBuffer.wrap(data);
+        this.offStart = 0;
+        this.offEnd = data.length;
     }
 
     public void writeData(byte[] src) {
@@ -33,5 +35,16 @@ public class PageData {
 
         offEnd -= sizeOffFullPointer;
         offStart += src.length;
+    }
+
+    public byte[] readData() {
+        int off = data.getInt(offEnd - offOffset);
+        int length = data.getInt(offEnd - sizeOffFullPointer);
+
+        offEnd -= sizeOffFullPointer;
+
+        byte[] dst = new byte[length];
+        data.get(dst, off, length);
+        return dst;
     }
 }

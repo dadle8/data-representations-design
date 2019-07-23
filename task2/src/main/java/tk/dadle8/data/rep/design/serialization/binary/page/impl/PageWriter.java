@@ -21,6 +21,8 @@ public class PageWriter {
     public void writePage() throws IOException {
         writePageHeader();
         writePageDate();
+        oos.flush();
+        oos.close();
     }
 
     public void writePageDate() throws IOException {
