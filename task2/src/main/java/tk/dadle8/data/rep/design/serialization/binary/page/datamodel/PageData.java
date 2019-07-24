@@ -3,6 +3,7 @@ package tk.dadle8.data.rep.design.serialization.binary.page.datamodel;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
 
 import static tk.dadle8.data.rep.design.serialization.binary.page.utils.PageUtils.offOffset;
@@ -44,6 +45,7 @@ public class PageData {
         offEnd -= sizeOffFullPointer;
 
         byte[] dst = new byte[length];
+        // TODO: переделать. тк тут offset - это смещение внутри dst. Нам не получить таким способом n-байт по нужному смещению
         data.get(dst, off, length);
         return dst;
     }

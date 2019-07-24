@@ -7,6 +7,7 @@ import tk.dadle8.data.rep.design.serialization.binary.page.impl.PageReader;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 public class TableReader {
 
@@ -41,7 +42,25 @@ public class TableReader {
     }
 
     protected void readTableColumns() {
+        ByteBuffer byteBuffer = ByteBuffer.wrap(page.readData());
+        int offset = 0;
 
+        int nameLength = byteBuffer.getInt();
+        byte[] nameBytes = new byte[nameLength];
+        byteBuffer.get(nameBytes, offset, nameLength);
+
+        int typeLength = byteBuffer.get(Integer.BYTES + nameLength);
+        offset = 2 * Integer.BYTES + nameLength;
+        byte[] typeBytes = new byte[typeLength];
+        byteBuffer.get(typeBytes, offset, typeLength);
+
+        int order = byteBuffer.get(2 * Integer.BYTES + nameLength + typeLength);
+
+        try {
+            System.out.println(new Column(new String(nameBytes), Class.forName(new String(typeBytes)), order));
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("Can not read column =(", e);
+        }
     }
 
     private void readTableColumn(Column column) {

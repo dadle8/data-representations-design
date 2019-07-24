@@ -20,10 +20,12 @@ public class Column {
     public byte[] getBytes() {
         byte[] nameBytes = name.getBytes();
         byte[] typeBytes = type.getCanonicalName().getBytes();
-        int allDataLength = nameBytes.length + typeBytes.length + Integer.BYTES;
+        int allDataLength = nameBytes.length + typeBytes.length + 3 * Integer.BYTES;
 
         ByteBuffer columnData = ByteBuffer.wrap(new byte[allDataLength]);
+        columnData.putInt(nameBytes.length);
         columnData.put(nameBytes);
+        columnData.putInt(typeBytes.length);
         columnData.put(typeBytes);
         columnData.putInt(order);
 

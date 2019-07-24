@@ -20,7 +20,7 @@ public class TableWriter {
         this.page = new Page(pageTypeNameColumns);
         this.table = table;
         try {
-            this.pageWriter = new PageWriter(page, new File("table.td"));
+            this.pageWriter = new PageWriter(new File("table.td"));
         } catch (IOException e) {
             throw new RuntimeException("Can not create page writer =(", e);
         }
@@ -30,7 +30,8 @@ public class TableWriter {
         writeTableName();
         writeTableColumns();
         try {
-            pageWriter.writePage();
+            pageWriter.writePage(page);
+            pageWriter.close();
         } catch (IOException e) {
             throw new RuntimeException("Can not write page =(", e);
         }
@@ -71,7 +72,7 @@ public class TableWriter {
             newPage.getHeader().setPageId(page.getHeader().getPageId());
 
             try {
-                pageWriter.writePage();
+                pageWriter.writePage(page);
             } catch (IOException e) {
                 throw new RuntimeException("Can not write page =(", e);
             }
