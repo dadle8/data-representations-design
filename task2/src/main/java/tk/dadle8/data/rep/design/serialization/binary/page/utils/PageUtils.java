@@ -6,7 +6,7 @@ public class PageUtils {
     public static int pageDataLength = pageLength - pageHeaderSize;
     public static int offLength = Integer.BYTES;
     public static int offOffset = Integer.BYTES;
-    public static int sizeOffFullPointer = offOffset + offLength;
+    public static int sizeOffFullPointer = offLength;
     public static int pageTypeNameColumns = 0;
     public static int pageTypeRows = 1;
     public static int pageTypeNameColumnsContinue = 2;

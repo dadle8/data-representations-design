@@ -11,7 +11,6 @@ import java.util.Arrays;
 
 public class PageReader {
 
-    private int off = 0;
     private byte[] rawData = new byte[PageUtils.pageLength];
     private ObjectInputStream ois;
 
@@ -20,8 +19,9 @@ public class PageReader {
     }
 
     public Page readPage() throws IOException {
-        ois.read(rawData, off, PageUtils.pageLength);
-        off += PageUtils.pageLength;
+        if (ois.read(rawData) == -1) {
+            return null;
+        }
 
         return new Page(readPageHeader(), readPageDate());
     }
@@ -33,13 +33,12 @@ public class PageReader {
     public PageHeader readPageHeader() {
         ByteBuffer buffer = ByteBuffer.wrap(rawData, 0, PageUtils.pageHeaderSize);
 
-        PageHeader header = new PageHeader();
-        header.setPageNumber(buffer.getInt());
-        header.setPageType(buffer.getInt());
-        header.setPageFreeSpace(buffer.getInt());
-        header.setPageId(buffer.getInt());
-
-        return header;
+        return PageHeader.builder()
+                .pageNumber(buffer.getInt())
+                .pageType(buffer.getInt())
+                .pageFreeSpace(buffer.getInt())
+                .pageId(buffer.getInt())
+                .build();
     }
 
 }

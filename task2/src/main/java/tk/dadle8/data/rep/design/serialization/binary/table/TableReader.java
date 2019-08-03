@@ -2,69 +2,84 @@ package tk.dadle8.data.rep.design.serialization.binary.table;
 
 import tk.dadle8.data.rep.design.datamodel.RelationTable;
 import tk.dadle8.data.rep.design.datamodel.structure.Column;
+import tk.dadle8.data.rep.design.datamodel.structure.Row;
 import tk.dadle8.data.rep.design.serialization.binary.page.datamodel.Page;
 import tk.dadle8.data.rep.design.serialization.binary.page.impl.PageReader;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
+
+import static tk.dadle8.data.rep.design.serialization.binary.page.utils.PageUtils.*;
 
 public class TableReader {
 
     private Page page;
-    private RelationTable table;
     private PageReader pageReader;
-    private int off = 0;
-    private int pageFreeSpace;
+    private int pageOccupiedSpace = 0;
+    private int readDataLength = 0;
 
-    public TableReader(RelationTable table) {
-        this.table = table;
+    public TableReader(String pathName) {
         try {
-            this.pageReader = new PageReader(new File("table.td"));
+            this.pageReader = new PageReader(new File(pathName));
         } catch (IOException e) {
             throw new RuntimeException("Can not create page reader =(", e);
         }
     }
 
-    public void readTable() {
+    public RelationTable readTable() throws ClassNotFoundException, IOException {
         try {
             page = pageReader.readPage();
-            pageFreeSpace = page.getFreeSpace();
+            pageOccupiedSpace = pageDataLength - page.getFreeSpace();
         } catch (IOException e) {
             throw new RuntimeException("Can not read page =(", e);
         }
-        readTableName();
-        readTableColumns();
+        return new RelationTable(readTableName(), readTableColumns(), new Row[]{});
     }
 
-    protected void readTableName() {
-        table.setName(new String(page.readData()));
+    protected String readTableName() {
+        byte[] data = page.readData();
+        readDataLength += data.length + sizeOffFullPointer;
+        return new String(data);
     }
 
-    protected void readTableColumns() {
-        ByteBuffer byteBuffer = ByteBuffer.wrap(page.readData());
-        int offset = 0;
+    protected Column[] readTableColumns() throws ClassNotFoundException, IOException {
+        List<Column> columns = new ArrayList<>();
+        while (page != null) {
+            // check exist data for read
+            if (pageOccupiedSpace - readDataLength == 0) {
+                page = pageReader.readPage();
+                if (page == null) {
+                    break;
+                }
+                pageOccupiedSpace = pageDataLength - page.getFreeSpace();
+                readDataLength = 0;
+            }
+            while (pageOccupiedSpace != readDataLength) {
+                byte[] data = page.readData();
+                readDataLength += data.length + sizeOffFullPointer;
+                columns.add(readTableColumn(data));
+            }
+        }
+        return columns.toArray(new Column[0]);
+    }
+
+    private Column readTableColumn(byte[] columnData) throws ClassNotFoundException {
+        ByteBuffer byteBuffer = ByteBuffer.wrap(columnData);
 
         int nameLength = byteBuffer.getInt();
         byte[] nameBytes = new byte[nameLength];
-        byteBuffer.get(nameBytes, offset, nameLength);
+        byteBuffer.get(nameBytes);
 
-        int typeLength = byteBuffer.get(Integer.BYTES + nameLength);
-        offset = 2 * Integer.BYTES + nameLength;
+        int typeLength = byteBuffer.getInt();
         byte[] typeBytes = new byte[typeLength];
-        byteBuffer.get(typeBytes, offset, typeLength);
+        byteBuffer.get(typeBytes);
 
-        int order = byteBuffer.get(2 * Integer.BYTES + nameLength + typeLength);
+        int order = byteBuffer.getInt();
 
-        try {
-            System.out.println(new Column(new String(nameBytes), Class.forName(new String(typeBytes)), order));
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException("Can not read column =(", e);
-        }
-    }
-
-    private void readTableColumn(Column column) {
-
+        return new Column(new String(nameBytes), Class.forName(new String(typeBytes)), order);
     }
 
     protected void readTableRows() {

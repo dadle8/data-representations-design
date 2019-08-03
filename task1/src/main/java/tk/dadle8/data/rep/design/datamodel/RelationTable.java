@@ -123,4 +123,8 @@ public class RelationTable implements BasicTableOperations {
                 + '\n'
                 + rows.stream().map(Row::toString).collect(Collectors.joining("\n"));
     }
+
+    public int getId() {
+        return name.hashCode();
+    }
 }

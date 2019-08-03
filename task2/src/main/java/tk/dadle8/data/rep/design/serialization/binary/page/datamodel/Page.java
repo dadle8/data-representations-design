@@ -4,33 +4,22 @@ import lombok.Getter;
 import lombok.Setter;
 import tk.dadle8.data.rep.design.serialization.binary.page.utils.PageUtils;
 
+import static tk.dadle8.data.rep.design.serialization.binary.page.utils.PageUtils.sizeOffFullPointer;
+
 @Getter
 @Setter
 public class Page {
     private PageHeader header;
     private PageData data;
-    private int dataLength;
 
-    public Page(int type) {
-        header = new PageHeader();
-        header.setPageType(type);
-        header.setPageFreeSpace(PageUtils.pageDataLength);
-        data = new PageData(PageUtils.pageDataLength);
-        dataLength = PageUtils.pageLength;
-    }
-
-    public Page(int type, int dataLength) {
-        this.header = new PageHeader();
-        this.header.setPageFreeSpace(dataLength - PageUtils.pageHeaderSize);
-        this.header.setPageType(type);
-        this.data = new PageData(dataLength - PageUtils.pageHeaderSize);
-        this.dataLength = dataLength;
+    public Page(PageHeader header) {
+        this.header = header;
+        this.data = new PageData(PageUtils.pageDataLength);
     }
 
     public Page(PageHeader header, PageData data) {
         this.header = header;
         this.data = data;
-        this.dataLength = PageUtils.pageHeaderSize + data.getData().capacity();
     }
 
     public int getFreeSpace() {
@@ -38,7 +27,7 @@ public class Page {
     }
 
     public void reduceSpace(int length) {
-        header.setPageFreeSpace(header.getPageFreeSpace() - length);
+        header.setPageFreeSpace(header.getPageFreeSpace() - length - sizeOffFullPointer);
     }
 
     public void writeData(byte[] data) {

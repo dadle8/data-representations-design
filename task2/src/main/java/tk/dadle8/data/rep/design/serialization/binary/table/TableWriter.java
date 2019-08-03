@@ -3,6 +3,7 @@ package tk.dadle8.data.rep.design.serialization.binary.table;
 import tk.dadle8.data.rep.design.datamodel.RelationTable;
 import tk.dadle8.data.rep.design.datamodel.structure.Column;
 import tk.dadle8.data.rep.design.serialization.binary.page.datamodel.Page;
+import tk.dadle8.data.rep.design.serialization.binary.page.datamodel.PageHeader;
 import tk.dadle8.data.rep.design.serialization.binary.page.impl.PageWriter;
 
 import java.io.File;
@@ -17,7 +18,13 @@ public class TableWriter {
     private PageWriter pageWriter;
 
     public TableWriter(RelationTable table) {
-        this.page = new Page(pageTypeNameColumns);
+        this.page = new Page(PageHeader.builder()
+                .pageNumber(0)
+                .pageType(pageTypeNameColumns)
+                .pageId(table.getId())
+                .pageFreeSpace(pageDataLength)
+                .build()
+        );
         this.table = table;
         try {
             this.pageWriter = new PageWriter(new File("table.td"));
@@ -42,7 +49,7 @@ public class TableWriter {
         createNewPageIfNoFreeSpace(name.length);
 
         page.writeData(name);
-        page.reduceSpace(name.length + sizeOffFullPointer);
+        page.reduceSpace(name.length);
     }
 
     protected void writeTableColumns() {
@@ -54,7 +61,7 @@ public class TableWriter {
         createNewPageIfNoFreeSpace(columnBytes.length);
 
         page.writeData(columnBytes);
-        page.reduceSpace(columnBytes.length + sizeOffFullPointer);
+        page.reduceSpace(columnBytes.length);
     }
 
     protected void writeTableRows() {
@@ -62,22 +69,26 @@ public class TableWriter {
     }
 
     private void createNewPageIfNoFreeSpace(int dataLength) {
-        if (page.getDataLength() - pageHeaderSize - sizeOffFullPointer < dataLength) {
+        if (pageDataLength - sizeOffFullPointer < dataLength) {
             throw new RuntimeException("Too much data size =(");
         }
-        if (page.getFreeSpace() + sizeOffFullPointer < dataLength) {
-            Page newPage = new Page(page.getDataLength());
-            newPage.getHeader().setPageNumber(page.getHeader().getPageNumber());
-            newPage.getHeader().setPageType(page.getHeader().getPageType());
-            newPage.getHeader().setPageId(page.getHeader().getPageId());
-
+        if (page.getFreeSpace() - sizeOffFullPointer < dataLength) {
             try {
                 pageWriter.writePage(page);
             } catch (IOException e) {
                 throw new RuntimeException("Can not write page =(", e);
             }
 
-            page = newPage;
+            page = createNewPage();
         }
+    }
+
+    private Page createNewPage() {
+        return new Page(PageHeader.builder()
+                .pageNumber(page.getHeader().getPageNumber() + 1)
+                .pageType(page.getHeader().getPageType())
+                .pageId(page.getHeader().getPageId())
+                .pageFreeSpace(pageDataLength)
+                .build());
     }
 }
