@@ -30,19 +30,20 @@ public class TableReader {
     }
 
     public RelationTable readTable() throws ClassNotFoundException, IOException {
-        try {
-            page = pageReader.readPage();
-            pageOccupiedSpace = pageDataLength - page.getFreeSpace();
-        } catch (IOException e) {
-            throw new RuntimeException("Can not read page =(", e);
-        }
         return new RelationTable(readTableName(), readTableColumns(), new Row[]{});
     }
 
     protected String readTableName() {
-        byte[] data = page.readData();
-        readDataLength += data.length + sizeOffFullPointer;
-        return new String(data);
+        try {
+            Page newPage = readPageFromReader();
+            if (newPage != null) {
+                page = newPage;
+                return new String(readRawData());
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Can not read page =(", e);
+        }
+        return "";
     }
 
     protected Column[] readTableColumns() throws ClassNotFoundException, IOException {
@@ -50,20 +51,32 @@ public class TableReader {
         while (page != null) {
             // check exist data for read
             if (pageOccupiedSpace - readDataLength == 0) {
-                page = pageReader.readPage();
-                if (page == null) {
+                Page newPage = readPageFromReader();
+                if (newPage == null) {
                     break;
                 }
-                pageOccupiedSpace = pageDataLength - page.getFreeSpace();
-                readDataLength = 0;
+                page = newPage;
             }
             while (pageOccupiedSpace != readDataLength) {
-                byte[] data = page.readData();
-                readDataLength += data.length + sizeOffFullPointer;
-                columns.add(readTableColumn(data));
+                columns.add(readTableColumn(readRawData()));
             }
         }
         return columns.toArray(new Column[0]);
+    }
+
+    private Page readPageFromReader() throws IOException {
+        Page page = pageReader.readPage();
+        if (page != null) {
+            pageOccupiedSpace = pageDataLength - page.getFreeSpace();
+            readDataLength = 0;
+        }
+        return page;
+    }
+
+    private byte[] readRawData() {
+        byte[] data = page.readData();
+        readDataLength += data.length + sizeOffFullPointer;
+        return data;
     }
 
     private Column readTableColumn(byte[] columnData) throws ClassNotFoundException {
