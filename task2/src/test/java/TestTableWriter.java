@@ -22,7 +22,7 @@ public class TestTableWriter {
                         new Column("Column7", Integer.class, 6),
                         new Column("Column8", Integer.class, 7),
                         new Column("Column9", Integer.class, 8),
-                        new Column("Column9", Integer.class, 8),
+                        new Column("Column10", Integer.class, 9),
                 },
                 new Row[]{});
 
