@@ -5,6 +5,7 @@ import tk.dadle8.data.rep.design.datamodel.structure.Column;
 import tk.dadle8.data.rep.design.serialization.binary.page.datamodel.Page;
 import tk.dadle8.data.rep.design.serialization.binary.page.datamodel.PageHeader;
 import tk.dadle8.data.rep.design.serialization.binary.page.impl.PageWriter;
+import tk.dadle8.data.rep.design.serialization.binary.page.utils.PageUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,11 +46,7 @@ public class TableWriter {
     }
 
     protected void writeTableName() {
-        byte[] name = table.getName().getBytes();
-        createNewPageIfNoFreeSpace(name.length);
-
-        page.writeData(name);
-        page.reduceSpace(name.length);
+        writeDataToPage(table.getName().getBytes());
     }
 
     protected void writeTableColumns() {
@@ -57,11 +54,14 @@ public class TableWriter {
     }
 
     private void writeTableColumn(Column column) {
-        byte[] columnBytes = column.getBytes();
-        createNewPageIfNoFreeSpace(columnBytes.length);
+        writeDataToPage(column.getBytes());
+    }
 
-        page.writeData(columnBytes);
-        page.reduceSpace(columnBytes.length);
+    private void writeDataToPage(byte[] data) {
+        createNewPageIfNoFreeSpace(data.length);
+
+        page.writeData(data);
+        page.reduceSpace(data.length);
     }
 
     protected void writeTableRows() {
@@ -86,7 +86,7 @@ public class TableWriter {
     private Page createNewPage() {
         return new Page(PageHeader.builder()
                 .pageNumber(page.getHeader().getPageNumber() + 1)
-                .pageType(page.getHeader().getPageType())
+                .pageType(PageUtils.getPageType(page.getHeader().getPageType()))
                 .pageId(page.getHeader().getPageId())
                 .pageFreeSpace(pageDataLength)
                 .build());

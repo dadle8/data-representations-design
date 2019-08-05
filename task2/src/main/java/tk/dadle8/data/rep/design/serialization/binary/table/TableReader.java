@@ -5,6 +5,7 @@ import tk.dadle8.data.rep.design.datamodel.structure.Column;
 import tk.dadle8.data.rep.design.datamodel.structure.Row;
 import tk.dadle8.data.rep.design.serialization.binary.page.datamodel.Page;
 import tk.dadle8.data.rep.design.serialization.binary.page.impl.PageReader;
+import tk.dadle8.data.rep.design.serialization.binary.page.utils.PageUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,18 +49,12 @@ public class TableReader {
 
     protected Column[] readTableColumns() throws ClassNotFoundException, IOException {
         List<Column> columns = new ArrayList<>();
-        while (page != null) {
-            // check exist data for read
-            if (pageOccupiedSpace - readDataLength == 0) {
-                Page newPage = readPageFromReader();
-                if (newPage == null) {
-                    break;
-                }
-                page = newPage;
-            }
+        while (page != null && page.getHeader().getPageType() != PageUtils.pageTypeRows) {
             while (pageOccupiedSpace != readDataLength) {
                 columns.add(readTableColumn(readRawData()));
             }
+
+            page = readPageFromReader();
         }
         return columns.toArray(new Column[0]);
     }
@@ -75,7 +70,7 @@ public class TableReader {
 
     private byte[] readRawData() {
         byte[] data = page.readData();
-        readDataLength += data.length + sizeOffFullPointer;
+        readDataLength += data.length + PageUtils.sizeOffFullPointer;
         return data;
     }
 
