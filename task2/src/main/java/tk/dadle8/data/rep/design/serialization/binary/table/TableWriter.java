@@ -2,6 +2,7 @@ package tk.dadle8.data.rep.design.serialization.binary.table;
 
 import tk.dadle8.data.rep.design.datamodel.RelationTable;
 import tk.dadle8.data.rep.design.datamodel.structure.Column;
+import tk.dadle8.data.rep.design.datamodel.structure.Row;
 import tk.dadle8.data.rep.design.serialization.binary.page.datamodel.Page;
 import tk.dadle8.data.rep.design.serialization.binary.page.datamodel.PageHeader;
 import tk.dadle8.data.rep.design.serialization.binary.page.impl.PageWriter;
@@ -65,7 +66,11 @@ public class TableWriter {
     }
 
     protected void writeTableRows() {
+        table.getRows().forEach(this::writeTableRow);
+    }
 
+    private void writeTableRow(Row row, Column[] columns) {
+        writeDataToPage(row.getBytes(columns));
     }
 
     private void createNewPageIfNoFreeSpace(int dataLength) {
