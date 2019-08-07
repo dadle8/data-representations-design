@@ -5,11 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.ByteArrayOutputStream;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.HeapByteBuffer;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.Arrays;
-import java.util.stream.Stream;
 
 @Getter
 @Setter
@@ -32,26 +30,32 @@ public class Row {
     }
 
     public byte[] getBytes(Column[] columns) {
-        ByteBuffer buffer = ByteBuffer.allocate(32);
-
-        for(Column column : columns) {
-            Object value = getComponentValue(column.getOrder());
-            buffer = createNewBufferIfNeeded(buffer, );
-
-
-
+        byte[] data;
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+             ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream)) {
+            for (Column column : columns) {
+                Object value = getComponentValue(column.getOrder());
+                if (value instanceof Integer) {
+                    objectOutputStream.writeInt((Integer) value);
+                } else if (value instanceof Long) {
+                    objectOutputStream.writeLong((Long) value);
+                } else if (value instanceof Short) {
+                    objectOutputStream.writeShort((Short) value);
+                } else if (value instanceof Float) {
+                    objectOutputStream.writeFloat((Float) value);
+                } else if (value instanceof Double) {
+                    objectOutputStream.writeDouble((Double) value);
+                } else if (value instanceof String) {
+                    objectOutputStream.writeUTF((String) value);
+                }
+            }
+            objectOutputStream.flush();
+            data = outputStream.toByteArray();
+        } catch (IOException e) {
+            throw new RuntimeException("Can not get byte array from Row =(", e);
         }
 
-        return buffer.array();
+        return data;
     }
 
-    public ByteBuffer createNewBufferIfNeeded(ByteBuffer buffer, int dataLength) {
-        if (buffer.capacity() - buffer.position() < dataLength) {
-            ByteBuffer larger = ByteBuffer.allocateDirect(buffer.capacity() * 2 + dataLength);
-            buffer.rewind();
-            larger.put(buffer);
-            buffer = larger;
-        }
-        return buffer;
-    }
 }

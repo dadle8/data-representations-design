@@ -2,18 +2,21 @@ package tk.dadle8.data.rep.design.serialization.binary.table;
 
 import tk.dadle8.data.rep.design.datamodel.RelationTable;
 import tk.dadle8.data.rep.design.datamodel.structure.Column;
+import tk.dadle8.data.rep.design.datamodel.structure.Component;
 import tk.dadle8.data.rep.design.datamodel.structure.Row;
 import tk.dadle8.data.rep.design.serialization.binary.page.datamodel.Page;
 import tk.dadle8.data.rep.design.serialization.binary.page.impl.PageReader;
 import tk.dadle8.data.rep.design.serialization.binary.page.utils.PageUtils;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import static tk.dadle8.data.rep.design.serialization.binary.page.utils.PageUtils.*;
+import static tk.dadle8.data.rep.design.serialization.binary.page.utils.PageUtils.pageDataLength;
 
 public class TableReader {
 
@@ -31,7 +34,10 @@ public class TableReader {
     }
 
     public RelationTable readTable() throws ClassNotFoundException, IOException {
-        return new RelationTable(readTableName(), readTableColumns(), new Row[]{});
+        String name = readTableName();
+        Column[] columns = readTableColumns();
+        Row[] rows = readTableRows(columns);
+        return new RelationTable(name, columns, rows);
     }
 
     protected String readTableName() {
@@ -90,7 +96,42 @@ public class TableReader {
         return new Column(new String(nameBytes), Class.forName(new String(typeBytes)), order);
     }
 
-    protected void readTableRows() {
+    protected Row[] readTableRows(Column[] columns) throws IOException {
+        List<Row> rows = new ArrayList<>();
+        while (page != null) {
+            while (pageOccupiedSpace != readDataLength) {
+                rows.add(readTableRow(readRawData(), columns));
+            }
 
+            page = readPageFromReader();
+        }
+        return rows.toArray(new Row[0]);
+    }
+
+    private Row readTableRow(byte[] rowData, Column[] columns) {
+        Row row;
+        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(rowData);
+             ObjectInputStream objectInputStream = new ObjectInputStream(inputStream)) {
+            Component[] components = new Component[columns.length];
+            for (var i = 0; i < columns.length; i++) {
+                if (columns[i].getType().equals(Integer.class)) {
+                    components[i] = new Component(objectInputStream.readInt());
+                } else if (columns[i].getType().equals(Long.class)) {
+                    components[i] = new Component(objectInputStream.readLong());
+                } else if (columns[i].getType().equals(Short.class)) {
+                    components[i] = new Component(objectInputStream.readShort());
+                } else if (columns[i].getType().equals(Float.class)) {
+                    components[i] = new Component(objectInputStream.readFloat());
+                } else if (columns[i].getType().equals(Double.class)) {
+                    components[i] = new Component(objectInputStream.readDouble());
+                } else if (columns[i].getType().equals(String.class)) {
+                    components[i] = new Component(objectInputStream.readUTF());
+                }
+            }
+            row = new Row(components);
+        } catch (IOException e) {
+            throw new RuntimeException("Can not get byte array from Row =(", e);
+        }
+        return row;
     }
 }

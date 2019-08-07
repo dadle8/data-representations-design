@@ -11,8 +11,6 @@ import tk.dadle8.data.rep.design.serialization.binary.page.utils.PageUtils;
 import java.io.File;
 import java.io.IOException;
 
-import static tk.dadle8.data.rep.design.serialization.binary.page.utils.PageUtils.*;
-
 public class TableWriter {
 
     private Page page;
@@ -22,9 +20,9 @@ public class TableWriter {
     public TableWriter(RelationTable table) {
         this.page = new Page(PageHeader.builder()
                 .pageNumber(0)
-                .pageType(pageTypeNameColumns)
+                .pageType(PageUtils.pageTypeNameColumns)
                 .pageId(table.getId())
-                .pageFreeSpace(pageDataLength)
+                .pageFreeSpace(PageUtils.pageDataLength)
                 .build()
         );
         this.table = table;
@@ -38,11 +36,11 @@ public class TableWriter {
     public void writeTable() {
         writeTableName();
         writeTableColumns();
+        writeTableRows(table.getColumns().values().toArray(new Column[0]));
         try {
-            pageWriter.writePage(page);
             pageWriter.close();
         } catch (IOException e) {
-            throw new RuntimeException("Can not write page =(", e);
+            throw new RuntimeException("Can not close page =(", e);
         }
     }
 
@@ -52,6 +50,11 @@ public class TableWriter {
 
     protected void writeTableColumns() {
         table.getColumns().values().forEach(this::writeTableColumn);
+        try {
+            pageWriter.writePage(page);
+        } catch (IOException e) {
+            throw new RuntimeException("Can not write page =(", e);
+        }
     }
 
     private void writeTableColumn(Column column) {
@@ -65,8 +68,21 @@ public class TableWriter {
         page.reduceSpace(data.length);
     }
 
-    protected void writeTableRows() {
-        table.getRows().forEach(this::writeTableRow);
+    protected void writeTableRows(Column[] columns) {
+        page = new Page(PageHeader.builder()
+                .pageNumber(page.getHeader().getPageNumber() + 1)
+                .pageType(PageUtils.pageTypeRows)
+                .pageId(page.getHeader().getPageId())
+                .pageFreeSpace(PageUtils.pageDataLength)
+                .build());
+
+        table.getRows().forEach(row -> writeTableRow(row, columns));
+
+        try {
+            pageWriter.writePage(page);
+        } catch (IOException e) {
+            throw new RuntimeException("Can not write page =(", e);
+        }
     }
 
     private void writeTableRow(Row row, Column[] columns) {
@@ -74,10 +90,10 @@ public class TableWriter {
     }
 
     private void createNewPageIfNoFreeSpace(int dataLength) {
-        if (pageDataLength - sizeOffFullPointer < dataLength) {
+        if (PageUtils.pageDataLength - PageUtils.sizeOffFullPointer < dataLength) {
             throw new RuntimeException("Too much data size =(");
         }
-        if (page.getFreeSpace() - sizeOffFullPointer < dataLength) {
+        if (page.getFreeSpace() - PageUtils.sizeOffFullPointer < dataLength) {
             try {
                 pageWriter.writePage(page);
             } catch (IOException e) {
@@ -93,7 +109,7 @@ public class TableWriter {
                 .pageNumber(page.getHeader().getPageNumber() + 1)
                 .pageType(PageUtils.getPageType(page.getHeader().getPageType()))
                 .pageId(page.getHeader().getPageId())
-                .pageFreeSpace(pageDataLength)
+                .pageFreeSpace(PageUtils.pageDataLength)
                 .build());
     }
 }

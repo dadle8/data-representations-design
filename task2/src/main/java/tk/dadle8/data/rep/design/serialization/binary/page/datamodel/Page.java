@@ -4,8 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 import tk.dadle8.data.rep.design.serialization.binary.page.utils.PageUtils;
 
-import static tk.dadle8.data.rep.design.serialization.binary.page.utils.PageUtils.sizeOffFullPointer;
-
 @Getter
 @Setter
 public class Page {
@@ -27,7 +25,7 @@ public class Page {
     }
 
     public void reduceSpace(int length) {
-        header.setPageFreeSpace(header.getPageFreeSpace() - length - sizeOffFullPointer);
+        header.setPageFreeSpace(header.getPageFreeSpace() - length - PageUtils.sizeOffFullPointer);
     }
 
     public void writeData(byte[] data) {

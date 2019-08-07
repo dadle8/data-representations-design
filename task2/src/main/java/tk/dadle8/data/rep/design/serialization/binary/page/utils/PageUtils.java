@@ -12,15 +12,6 @@ public class PageUtils {
     public static final int pageTypeNameColumnsContinue = 2;
     public static final int pageTypeRowsContinue = 3;
 
-    public static byte[] intToBytes(final int data) {
-        return new byte[] {
-                (byte)((data >> 24) & 0xff),
-                (byte)((data >> 16) & 0xff),
-                (byte)((data >> 8) & 0xff),
-                (byte)((data >> 0) & 0xff),
-        };
-    }
-
     public static int getPageType(int currentPageType) {
         switch (currentPageType) {
             case pageTypeNameColumns:

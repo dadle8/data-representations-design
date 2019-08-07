@@ -2,11 +2,9 @@ package tk.dadle8.data.rep.design.serialization.binary.page.datamodel;
 
 import lombok.Getter;
 import lombok.Setter;
+import tk.dadle8.data.rep.design.serialization.binary.page.utils.PageUtils;
 
 import java.nio.ByteBuffer;
-
-import static tk.dadle8.data.rep.design.serialization.binary.page.utils.PageUtils.offLength;
-import static tk.dadle8.data.rep.design.serialization.binary.page.utils.PageUtils.sizeOffFullPointer;
 
 @Getter
 @Setter
@@ -27,15 +25,15 @@ public class PageData {
 
     public void writeData(byte[] src) {
         data.put(src);
-        data.putInt(offEnd - offLength, src.length);
+        data.putInt(offEnd - PageUtils.offLength, src.length);
 
-        offEnd -= sizeOffFullPointer;
+        offEnd -= PageUtils.sizeOffFullPointer;
     }
 
     public byte[] readData() {
-        int length = data.getInt(offEnd - offLength);
+        int length = data.getInt(offEnd - PageUtils.offLength);
 
-        offEnd -= sizeOffFullPointer;
+        offEnd -= PageUtils.sizeOffFullPointer;
 
         byte[] dst = new byte[length];
         data.get(dst);

@@ -1,6 +1,7 @@
 import org.junit.Test;
 import tk.dadle8.data.rep.design.datamodel.RelationTable;
 import tk.dadle8.data.rep.design.datamodel.structure.Column;
+import tk.dadle8.data.rep.design.datamodel.structure.Component;
 import tk.dadle8.data.rep.design.datamodel.structure.Row;
 import tk.dadle8.data.rep.design.serialization.binary.table.TableReader;
 import tk.dadle8.data.rep.design.serialization.binary.table.TableWriter;
@@ -25,6 +26,56 @@ public class TestTableWriter {
                         new Column("Column10", Integer.class, 9),
                 },
                 new Row[]{});
+
+        TableWriter tableWriter = new TableWriter(table);
+        tableWriter.writeTable();
+
+        TableReader tableReader = new TableReader("table.td");
+        RelationTable tableRead = tableReader.readTable();
+        System.out.println(tableRead);
+    }
+
+    @Test
+    public void test_table_with_rows() throws ClassNotFoundException, IOException {
+        RelationTable table = new RelationTable("Test",
+                new Column[]{
+                        new Column("Column1", Integer.class, 0),
+                        new Column("Column2", Integer.class, 1),
+                        new Column("Column3", Integer.class, 2),
+                        new Column("Column4", String.class, 3),
+                },
+                new Row[]{
+                        new Row(new Component[]{
+                                new Component(0),
+                                new Component(10),
+                                new Component(2),
+                                new Component("Test1")
+                        }),
+                        new Row(new Component[]{
+                                new Component(0),
+                                new Component(1),
+                                new Component(2),
+                                new Component("Test2")
+                        }),
+                        new Row(new Component[]{
+                                new Component(0),
+                                new Component(1),
+                                new Component(2),
+                                new Component("Test3")
+                        }),
+                        new Row(new Component[]{
+                                new Component(0),
+                                new Component(1),
+                                new Component(2),
+                                new Component("Test4")
+                        }),
+                        new Row(new Component[]{
+                                new Component(0),
+                                new Component(1),
+                                new Component(2),
+                                new Component("Test5")
+                        })
+                });
 
         TableWriter tableWriter = new TableWriter(table);
         tableWriter.writeTable();
