@@ -18,9 +18,9 @@ public class TableWriter implements Closeable {
     private Page page;
     private PageWriter pageWriter;
 
-    public TableWriter() {
+    public TableWriter(String pathName) {
         try {
-            this.pageWriter = new PageWriter(new File("table.td"));
+            this.pageWriter = new PageWriter(new File(pathName));
         } catch (IOException e) {
             throw new RuntimeException("Can not create page writer =(", e);
         }

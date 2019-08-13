@@ -9,6 +9,8 @@ import tk.dadle8.data.rep.design.serialization.binary.table.TableWriter;
 import java.io.IOException;
 
 public class TestTableWriter {
+    
+    private String pathName = "table1.td";
 
     @Test
     public void test() throws ClassNotFoundException, IOException {
@@ -27,11 +29,11 @@ public class TestTableWriter {
                 },
                 new Row[]{});
 
-        TableWriter tableWriter = new TableWriter();
+        TableWriter tableWriter = new TableWriter(pathName);
         tableWriter.writeTable(table);
         tableWriter.close();
 
-        TableReader tableReader = new TableReader("table.td");
+        TableReader tableReader = new TableReader(pathName);
         RelationTable tableRead = tableReader.readTable();
         tableReader.close();
 
@@ -80,11 +82,11 @@ public class TestTableWriter {
                         })
                 });
 
-        TableWriter tableWriter = new TableWriter();
+        TableWriter tableWriter = new TableWriter(pathName);
         tableWriter.writeTable(table);
         tableWriter.close();
 
-        TableReader tableReader = new TableReader("table.td");
+        TableReader tableReader = new TableReader(pathName);
         RelationTable readiedTable = tableReader.readTable();
         tableReader.close();
 
@@ -143,13 +145,13 @@ public class TestTableWriter {
                         })
                 });
 
-        TableWriter tableWriter = new TableWriter();
+        TableWriter tableWriter = new TableWriter(pathName);
         tableWriter.writeTable(table1);
         tableWriter.writeTable(table2);
         tableWriter.close();
 
 
-        TableReader tableReader = new TableReader("table.td");
+        TableReader tableReader = new TableReader(pathName);
         RelationTable readiedTable1 = tableReader.readTable();
         RelationTable readiedTable2 = tableReader.readTable();
         tableReader.close();
