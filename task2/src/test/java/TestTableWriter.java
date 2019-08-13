@@ -27,11 +27,14 @@ public class TestTableWriter {
                 },
                 new Row[]{});
 
-        TableWriter tableWriter = new TableWriter(table);
-        tableWriter.writeTable();
+        TableWriter tableWriter = new TableWriter();
+        tableWriter.writeTable(table);
+        tableWriter.close();
 
         TableReader tableReader = new TableReader("table.td");
         RelationTable tableRead = tableReader.readTable();
+        tableReader.close();
+
         System.out.println(tableRead);
     }
 
@@ -77,11 +80,81 @@ public class TestTableWriter {
                         })
                 });
 
-        TableWriter tableWriter = new TableWriter(table);
-        tableWriter.writeTable();
+        TableWriter tableWriter = new TableWriter();
+        tableWriter.writeTable(table);
+        tableWriter.close();
 
         TableReader tableReader = new TableReader("table.td");
-        RelationTable tableRead = tableReader.readTable();
-        System.out.println(tableRead);
+        RelationTable readiedTable = tableReader.readTable();
+        tableReader.close();
+
+        System.out.println(readiedTable);
+    }
+
+    @Test
+    public void test_read_write_two_tables() throws ClassNotFoundException, IOException {
+        RelationTable table1 = new RelationTable("Test1",
+                new Column[]{
+                        new Column("Column1", Integer.class, 0),
+                        new Column("Column2", Integer.class, 1),
+                        new Column("Column3", Integer.class, 2),
+                        new Column("Column4", String.class, 3),
+                },
+                new Row[]{
+                        new Row(new Component[]{
+                                new Component(0),
+                                new Component(10),
+                                new Component(2),
+                                new Component("Test1")
+                        }),
+                        new Row(new Component[]{
+                                new Component(0),
+                                new Component(1),
+                                new Component(2),
+                                new Component("Test2")
+                        })
+                });
+
+        RelationTable table2 = new RelationTable("Test2",
+                new Column[]{
+                        new Column("Column1", Integer.class, 0),
+                        new Column("Column2", Integer.class, 1),
+                        new Column("Column3", Integer.class, 2),
+                        new Column("Column4", String.class, 3),
+                },
+                new Row[]{
+                        new Row(new Component[]{
+                                new Component(0),
+                                new Component(1),
+                                new Component(2),
+                                new Component("Test3")
+                        }),
+                        new Row(new Component[]{
+                                new Component(0),
+                                new Component(1),
+                                new Component(2),
+                                new Component("Test4")
+                        }),
+                        new Row(new Component[]{
+                                new Component(0),
+                                new Component(1),
+                                new Component(2),
+                                new Component("Test5")
+                        })
+                });
+
+        TableWriter tableWriter = new TableWriter();
+        tableWriter.writeTable(table1);
+        tableWriter.writeTable(table2);
+        tableWriter.close();
+
+
+        TableReader tableReader = new TableReader("table.td");
+        RelationTable readiedTable1 = tableReader.readTable();
+        RelationTable readiedTable2 = tableReader.readTable();
+        tableReader.close();
+
+        System.out.println(readiedTable1);
+        System.out.println(readiedTable2);
     }
 }

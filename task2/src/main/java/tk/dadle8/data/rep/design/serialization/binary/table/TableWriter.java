@@ -10,22 +10,14 @@ import tk.dadle8.data.rep.design.serialization.binary.page.utils.PageUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.stream.Stream;
 
 public class TableWriter {
 
     private Page page;
-    private RelationTable table;
     private PageWriter pageWriter;
 
-    public TableWriter(RelationTable table) {
-        this.page = new Page(PageHeader.builder()
-                .pageNumber(0)
-                .pageType(PageUtils.pageTypeNameColumns)
-                .pageId(table.getId())
-                .pageFreeSpace(PageUtils.pageDataLength)
-                .build()
-        );
-        this.table = table;
+    public TableWriter() {
         try {
             this.pageWriter = new PageWriter(new File("table.td"));
         } catch (IOException e) {
@@ -33,10 +25,15 @@ public class TableWriter {
         }
     }
 
-    public void writeTable() {
-        writeTableName();
-        writeTableColumns();
-        writeTableRows(table.getColumns().values().toArray(new Column[0]));
+    public void writeTable(RelationTable table) {
+        preparePage(table);
+
+        writeTableName(table.getName());
+        writeTableColumns(table.getColumns().values().toArray(new Column[0]));
+        writeTableRows(table.getRows().toArray(new Row[0]), table.getColumns().values().toArray(new Column[0]));
+    }
+
+    public void close() {
         try {
             pageWriter.close();
         } catch (IOException e) {
@@ -44,12 +41,22 @@ public class TableWriter {
         }
     }
 
-    protected void writeTableName() {
-        writeDataToPage(table.getName().getBytes());
+    public void preparePage(RelationTable table) {
+        this.page = new Page(PageHeader.builder()
+                .pageNumber(0)
+                .pageType(PageUtils.pageTypeNameColumns)
+                .pageId(table.getId())
+                .pageFreeSpace(PageUtils.pageDataLength)
+                .build()
+        );
     }
 
-    protected void writeTableColumns() {
-        table.getColumns().values().forEach(this::writeTableColumn);
+    protected void writeTableName(String tableName) {
+        writeDataToPage(tableName.getBytes());
+    }
+
+    protected void writeTableColumns(Column[] columns) {
+        Stream.of(columns).forEach(this::writeTableColumn);
         try {
             pageWriter.writePage(page);
         } catch (IOException e) {
@@ -68,7 +75,7 @@ public class TableWriter {
         page.reduceSpace(data.length);
     }
 
-    protected void writeTableRows(Column[] columns) {
+    protected void writeTableRows(Row[] rows, Column[] columns) {
         page = new Page(PageHeader.builder()
                 .pageNumber(page.getHeader().getPageNumber() + 1)
                 .pageType(PageUtils.pageTypeRows)
@@ -76,7 +83,7 @@ public class TableWriter {
                 .pageFreeSpace(PageUtils.pageDataLength)
                 .build());
 
-        table.getRows().forEach(row -> writeTableRow(row, columns));
+        Stream.of(rows).forEach(row -> writeTableRow(row, columns));
 
         try {
             pageWriter.writePage(page);

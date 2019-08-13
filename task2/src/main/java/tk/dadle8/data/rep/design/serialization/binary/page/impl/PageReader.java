@@ -29,6 +29,10 @@ public class PageReader {
         return new Page(readPageHeader(), readPageDate());
     }
 
+    public void close() throws IOException {
+        ois.close();
+    }
+
     public PageData readPageDate() {
         return new PageData(Arrays.copyOfRange(rawData, PageUtils.pageHeaderSize, PageUtils.pageLength));
     }

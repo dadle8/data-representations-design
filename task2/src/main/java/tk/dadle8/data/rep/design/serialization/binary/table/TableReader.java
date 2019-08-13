@@ -34,23 +34,29 @@ public class TableReader {
     }
 
     public RelationTable readTable() throws ClassNotFoundException, IOException {
+        prepareStartPage();
+
         String name = readTableName();
         Column[] columns = readTableColumns();
         Row[] rows = readTableRows(columns);
         return new RelationTable(name, columns, rows);
     }
 
-    protected String readTableName() {
-        try {
-            Page newPage = readPageFromReader();
-            if (newPage != null) {
-                page = newPage;
-                return new String(readRawData());
+    private void prepareStartPage() {
+        if (page == null) {
+            try {
+                page = readPageFromReader();
+            } catch (IOException e) {
+                throw new RuntimeException("Can not read page =(", e);
             }
-        } catch (IOException e) {
-            throw new RuntimeException("Can not read page =(", e);
         }
-        return "";
+    }
+
+    protected String readTableName() {
+        if (page == null) {
+            throw new RuntimeException("Can not read table name, because page is NULL");
+        }
+        return new String(readRawData());
     }
 
     protected Column[] readTableColumns() throws ClassNotFoundException, IOException {
@@ -65,13 +71,21 @@ public class TableReader {
         return columns.toArray(new Column[0]);
     }
 
+    public void close() {
+        try {
+            pageReader.close();
+        } catch (IOException e) {
+            throw new RuntimeException("Can not close page =(", e);
+        }
+    }
+
     private Page readPageFromReader() throws IOException {
-        Page page = pageReader.readPage();
-        if (page != null) {
-            pageOccupiedSpace = pageDataLength - page.getFreeSpace();
+        Page newPage = pageReader.readPage();
+        if (newPage != null) {
+            pageOccupiedSpace = pageDataLength - newPage.getFreeSpace();
             readDataLength = 0;
         }
-        return page;
+        return newPage;
     }
 
     private byte[] readRawData() {
@@ -98,7 +112,7 @@ public class TableReader {
 
     protected Row[] readTableRows(Column[] columns) throws IOException {
         List<Row> rows = new ArrayList<>();
-        while (page != null) {
+        while (page != null && page.getHeader().getPageType() != PageUtils.pageTypeNameColumns) {
             while (pageOccupiedSpace != readDataLength) {
                 rows.add(readTableRow(readRawData(), columns));
             }
