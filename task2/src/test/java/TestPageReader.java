@@ -12,6 +12,8 @@ public class TestPageReader {
         PageReader reader = new PageReader(new File("table.td"));
         Page page1 = reader.readPage();
         Page page2 = reader.readPage();
+        reader.close();
+
         System.out.println(page1);
         System.out.println(page2);
     }

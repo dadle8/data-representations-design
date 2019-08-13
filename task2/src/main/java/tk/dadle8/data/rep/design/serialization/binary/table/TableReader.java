@@ -12,13 +12,14 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.Closeable;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
 import static tk.dadle8.data.rep.design.serialization.binary.page.utils.PageUtils.pageDataLength;
 
-public class TableReader {
+public class TableReader implements Closeable {
 
     private Page page;
     private PageReader pageReader;

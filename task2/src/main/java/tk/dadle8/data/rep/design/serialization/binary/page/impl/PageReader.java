@@ -8,11 +8,12 @@ import tk.dadle8.data.rep.design.serialization.binary.page.utils.PageUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.Closeable;
 import java.io.ObjectInputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-public class PageReader {
+public class PageReader implements Closeable {
 
     private byte[] rawData = new byte[PageUtils.pageLength];
     private ObjectInputStream ois;

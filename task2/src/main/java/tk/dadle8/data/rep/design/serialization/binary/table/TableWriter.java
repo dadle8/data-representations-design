@@ -8,11 +8,12 @@ import tk.dadle8.data.rep.design.serialization.binary.page.datamodel.PageHeader;
 import tk.dadle8.data.rep.design.serialization.binary.page.impl.PageWriter;
 import tk.dadle8.data.rep.design.serialization.binary.page.utils.PageUtils;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.util.stream.Stream;
 
-public class TableWriter {
+public class TableWriter implements Closeable {
 
     private Page page;
     private PageWriter pageWriter;

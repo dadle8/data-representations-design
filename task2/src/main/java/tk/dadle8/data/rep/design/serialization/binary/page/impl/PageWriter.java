@@ -8,8 +8,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.Closeable;
 
-public class PageWriter {
+public class PageWriter implements Closeable {
     private ObjectOutputStream oos;
 
     public PageWriter(File file) throws IOException {
